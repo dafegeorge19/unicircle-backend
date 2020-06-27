@@ -9,7 +9,7 @@ function msg($success,$status,$message,$extra = []){
     return array_merge([
         'success' => $success,
         'status' => $status,
-        'message' => $message
+        'code' => $message
     ],$extra);
 }
 
@@ -37,11 +37,18 @@ else:
     $data->code = rand(0000, 9999);
 
     $toEmail = $data->email;
-    $subject = "User Registration Activation Code";
+    $subject = "User Activation Code";
     $content = "Your Code is: ". $data->code;
-    $mailHeaders = "From: My Unicircle \r\n";
-    if(mail($toEmail, $subject, $content, $mailHeaders)) {
-        $returnData = msg(1,200, $data->code);
+
+    $headers  = 'MIME-Version: 1.0' . "\r\n";
+    $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+    $headers .= "From: USER ACTIVATION CODE\r\n";
+    $headers .= "Reply-To: noreply@unicircle.com\r\n";
+    $headers .= "X-Mailer: PHP/" . phpversion();
+
+
+    if(mail($toEmail, $subject, $content, $headers)) {
+        $returnData = msg(1,200,$data->code);
     }
 
 endif;
