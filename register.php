@@ -31,13 +31,17 @@ elseif(!isset($data->email)
     || !isset($data->username)
     || !isset($data->phone_number)
     || !isset($data->password)
+    || !isset($data->first_name)
+    || !isset($data->last_name)
     || empty(trim($data->email))
     || empty(trim($data->username))
     || empty(trim($data->phone_number))
     || empty(trim($data->password))
+    || empty(trim($data->first_name))
+    || empty(trim($data->last_name))
     ):
 
-    $fields = ['fields' => ['email','username','phone_number','password']];
+    $fields = ['fields' => ['email','username','phone_number','password','first_name','last_name']];
     $returnData = msg(0,422,'Please Fill in all Required Fields!',$fields);
 
 // IF THERE ARE NO EMPTY FIELDS THEN-
@@ -47,6 +51,8 @@ else:
     $username = trim($data->username);
     $phone_number = trim($data->phone_number);
     $password = trim($data->password);
+    $first_name = trim($data->first_name);
+    $last_name = trim($data->last_name);
 
     if(!filter_var($email, FILTER_VALIDATE_EMAIL)):
         $returnData = msg(0,422,'Invalid Email Address!');
@@ -58,7 +64,13 @@ else:
         $returnData = msg(0,422,'Your name must be at least 3 characters long!');
 
     elseif(strlen($phone_number) < 11 || preg_match("/^[0-9]{3}-[0-9]{4}-[0-9]{4}$/", $phone_number)):
-        $returnData = msg(0,422,'Your phone number is ');
+        $returnData = msg(0,422,'Your phone number is not properly formatted');
+
+    elseif($first_name == ''):
+        $returnData = msg(0,422,'Firstname field cannot be empty!');
+
+    elseif($last_name == ''):
+        $returnData = msg(0,422,'Lastname field cannot be empty!');
 
     else:
         try{
@@ -71,7 +83,7 @@ else:
             if($check_email_stmt->rowCount()):
                 $returnData = msg(0,422, 'This E-mail already in use!');
             else:
-                $insert_query = "INSERT INTO `user_tbl`(`username`,`password`,`email`,`is_email_verified`,`phone`,`role`) VALUES(:username,:password,:email,:is_email_verified,:phone,:role)";
+                $insert_query = "INSERT INTO `user_tbl`(`username`,`password`,`email`,`is_email_verified`,`phone`,`first_name`,`last_name`,`role`) VALUES(:username,:password,:email,:is_email_verified,:phone,:first_name,:last_name,:role)";
 
                 $insert_stmt = $conn->prepare($insert_query);
 
@@ -81,6 +93,8 @@ else:
                 $insert_stmt->bindValue(':email', $email,PDO::PARAM_STR);
                 $insert_stmt->bindValue(':is_email_verified', 1,PDO::PARAM_INT);
                 $insert_stmt->bindValue(':phone', $phone_number,PDO::PARAM_STR);
+                $insert_stmt->bindValue(':first_name', $first_name,PDO::PARAM_STR);
+                $insert_stmt->bindValue(':last_name', $last_name,PDO::PARAM_STR);
                 $insert_stmt->bindValue(':role', 0,PDO::PARAM_INT);
 
                 $insert_stmt->execute();
