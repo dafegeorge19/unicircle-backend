@@ -69,10 +69,9 @@ else:
 
                     $jwt = new JwtHandler();
                     $token = $jwt->_jwt_encode_data(
-                        'http://localhost/php_auth_api/',
-                        array("user_id"=> $row['userid'])
+                        'http://localhost/'.__DIR__.'/',
+                        array("userid"=> $row['userid'])
                     );
-
                     $returnData = [
                         'success' => 1,
                         'message' => 'You have successfully logged in.',

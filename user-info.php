@@ -13,6 +13,9 @@ $db_connection = new Database();
 $conn = $db_connection->dbConnection();
 $auth = new Auth($conn,$allHeaders);
 
+$data = json_decode(file_get_contents("php://input"));
+$returnData = [];
+
 $returnData = [
     "success" => 0,
     "status" => 401,

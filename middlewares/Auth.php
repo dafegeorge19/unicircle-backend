@@ -18,8 +18,8 @@ class Auth extends JwtHandler{
 
                 $data = $this->_jwt_decode_data($this->token[1]);
 
-                if(isset($data['auth']) && isset($data['data']->user_id) && $data['auth']):
-                    $user = $this->fetchUser($data['data']->user_id);
+                if(isset($data['auth']) && isset($data['data']) && $data['auth']):
+                    $user = $this->fetchUser($data['data']->userid);
                     return $user;
 
                 else:
@@ -38,11 +38,11 @@ class Auth extends JwtHandler{
         endif;
     }
 
-    protected function fetchUser($user_id){
+    protected function fetchUser($userid){
         try{
-            $fetch_user_by_id = "SELECT `name`,`email` FROM `users` WHERE `id`=:id";
+            $fetch_user_by_id = "SELECT * FROM `user_tbl` WHERE `userid`=:userid";
             $query_stmt = $this->db->prepare($fetch_user_by_id);
-            $query_stmt->bindValue(':id', $user_id,PDO::PARAM_INT);
+            $query_stmt->bindValue(':userid', $userid,PDO::PARAM_INT);
             $query_stmt->execute();
 
             if($query_stmt->rowCount()):
