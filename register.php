@@ -22,27 +22,33 @@ $conn = $db_connection->dbConnection();
 $data = json_decode(file_get_contents("php://input"));
 $returnData = [];
 
+
+print_r($data);
+return;
 // IF REQUEST METHOD IS NOT POST
 if($_SERVER["REQUEST_METHOD"] != "POST"):
     $returnData = msg(0,404,'Page Not Found!');
 
 // CHECKING EMPTY FIELDS
-elseif(!isset($data->name)
-    || !isset($data->email)
+elseif(!isset($data->email)
+    || !isset($data->username)
+    || !isset($data->phone_number)
     || !isset($data->password)
-    || empty(trim($data->name))
     || empty(trim($data->email))
+    || empty(trim($data->username))
+    || empty(trim($data->phone_number))
     || empty(trim($data->password))
     ):
 
-    $fields = ['fields' => ['name','email','password']];
+    $fields = ['fields' => ['email','username','phone_number','password']];
     $returnData = msg(0,422,'Please Fill in all Required Fields!',$fields);
 
 // IF THERE ARE NO EMPTY FIELDS THEN-
 else:
 
-    $name = trim($data->name);
     $email = trim($data->email);
+    $username = trim($data->username);
+    $phone_number = trim($data->phone_number);
     $password = trim($data->password);
 
     if(!filter_var($email, FILTER_VALIDATE_EMAIL)):
@@ -51,13 +57,16 @@ else:
     elseif(strlen($password) < 8):
         $returnData = msg(0,422,'Your password must be at least 8 characters long!');
 
-    elseif(strlen($name) < 3):
+    elseif(strlen($username) < 3):
         $returnData = msg(0,422,'Your name must be at least 3 characters long!');
+
+    elseif(strlen($phone_number) < 11 || preg_match("/^[0-9]{3}-[0-9]{4}-[0-9]{4}$/", $phone_number)):
+        $returnData = msg(0,422,'Your phone number is ');
 
     else:
         try{
 
-            $check_email = "SELECT `email` FROM `users` WHERE `email`=:email";
+            $check_email = "SELECT `email` FROM `user_tbl` WHERE `email`=:email";
             $check_email_stmt = $conn->prepare($check_email);
             $check_email_stmt->bindValue(':email', $email,PDO::PARAM_STR);
             $check_email_stmt->execute();
