@@ -22,9 +22,6 @@ $conn = $db_connection->dbConnection();
 $data = json_decode(file_get_contents("php://input"));
 $returnData = [];
 
-
-print_r($data);
-return;
 // IF REQUEST METHOD IS NOT POST
 if($_SERVER["REQUEST_METHOD"] != "POST"):
     $returnData = msg(0,404,'Page Not Found!');
@@ -73,20 +70,22 @@ else:
 
             if($check_email_stmt->rowCount()):
                 $returnData = msg(0,422, 'This E-mail already in use!');
-
             else:
-                $insert_query = "INSERT INTO `users`(`name`,`email`,`password`) VALUES(:name,:email,:password)";
+                $insert_query = "INSERT INTO `user_tbl`(`username`,`password`,`email`,`is_email_verified`,`phone`,`role`) VALUES(:username,:password,:email,:is_email_verified,:phone,:role)";
 
                 $insert_stmt = $conn->prepare($insert_query);
 
                 // DATA BINDING
-                $insert_stmt->bindValue(':name', htmlspecialchars(strip_tags($name)),PDO::PARAM_STR);
-                $insert_stmt->bindValue(':email', $email,PDO::PARAM_STR);
+                $insert_stmt->bindValue(':username', htmlspecialchars(strip_tags($username)),PDO::PARAM_STR);
                 $insert_stmt->bindValue(':password', password_hash($password, PASSWORD_DEFAULT),PDO::PARAM_STR);
+                $insert_stmt->bindValue(':email', $email,PDO::PARAM_STR);
+                $insert_stmt->bindValue(':is_email_verified', 1,PDO::PARAM_INT);
+                $insert_stmt->bindValue(':phone', $phone_number,PDO::PARAM_STR);
+                $insert_stmt->bindValue(':role', 0,PDO::PARAM_INT);
 
                 $insert_stmt->execute();
 
-                $returnData = msg(1,201,'You have successfully registered.');
+                $returnData = msg(1,200,'You have successfully registered.');
 
             endif;
 

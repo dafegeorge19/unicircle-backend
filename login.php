@@ -53,7 +53,7 @@ else:
     else:
         try{
 
-            $fetch_user_by_email = "SELECT * FROM `users` WHERE `email`=:email";
+            $fetch_user_by_email = "SELECT * FROM `user_tbl` WHERE `email`=:email";
             $query_stmt = $conn->prepare($fetch_user_by_email);
             $query_stmt->bindValue(':email', $email,PDO::PARAM_STR);
             $query_stmt->execute();
@@ -70,7 +70,7 @@ else:
                     $jwt = new JwtHandler();
                     $token = $jwt->_jwt_encode_data(
                         'http://localhost/php_auth_api/',
-                        array("user_id"=> $row['id'])
+                        array("user_id"=> $row['userid'])
                     );
 
                     $returnData = [
