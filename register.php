@@ -97,19 +97,35 @@ else:
                 $insert_stmt->bindValue(':last_name', $last_name,PDO::PARAM_STR);
                 $insert_stmt->bindValue(':role', 0,PDO::PARAM_INT);
 
-                $insert_stmt->execute();
+                if($insert_stmt->execute()):
+                    $fetch_user_by_id = "SELECT * FROM `user_tbl` WHERE `email`=:email";
+                    $query_stmt = $conn->prepare($fetch_user_by_id);
+                    $query_stmt->bindValue(':email', $email,PDO::PARAM_STR);
+                    $query_stmt->execute();
 
-                $returnData = msg(1,200,'You have successfully registered.');
+                    if($query_stmt->rowCount()):
+                        $row = $query_stmt->fetch(PDO::FETCH_ASSOC);
+                        $returnData = [
+                            'success' => 1,
+                            'status' => 200,
+                            'user' => $row
+                        ];
+                        // $returnData = msg(1,200,'You have successfully registered.');
+                    else:
+                        return null;
+                    endif;
+                else:
+                    return null;
 
+                endif;
             endif;
-
         }
         catch(PDOException $e){
             $returnData = msg(0,500,$e->getMessage());
         }
     endif;
-
 endif;
 
 echo json_encode($returnData);
+
 ?>

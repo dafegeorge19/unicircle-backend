@@ -72,10 +72,18 @@ else:
                         'http://localhost/'.__DIR__.'/',
                         array("userid"=> $row['userid'])
                     );
+
+                    $fetch_user_by_id = "SELECT * FROM `user_tbl` WHERE `email`=:email";
+                    $query_stmt = $conn->prepare($fetch_user_by_id);
+                    $query_stmt->bindValue(':email', $email,PDO::PARAM_STR);
+                    $query_stmt->execute();
+                    $row = $query_stmt->fetch(PDO::FETCH_ASSOC);
+
                     $returnData = [
                         'success' => 1,
                         'message' => 'You have successfully logged in.',
-                        'token' => $token
+                        'token' => $token,
+                        'userinfo' => $row
                     ];
 
                 // IF INVALID PASSWORD

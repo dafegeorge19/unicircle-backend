@@ -34,22 +34,36 @@ elseif(!isset($data->email) ||  empty(trim($data->email))):
 
 // IF THERE ARE NO EMPTY FIELDS THEN-
 else:
-    $data->code = rand(0000, 9999);
+    $digits = 4;
+    $data->code = rand(pow(10, $digits-1), pow(10, $digits)-1);
 
-    $toEmail = $data->email;
+    // ini_set( 'display_errors', 1 );
+    // error_reporting( E_ALL );
+
+
+    $to = $data->email;
+    $from = 'noreply@unicicle.com';
+    $fromName = 'UNICIRCLE';
+
     $subject = "User Activation Code";
-    $content = "Your Code is: ". $data->code;
 
-    $headers  = 'MIME-Version: 1.0' . "\r\n";
-    $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-    $headers .= "From: USER ACTIVATION CODE\r\n";
-    $headers .= "Reply-To: noreply@unicircle.com\r\n";
-    $headers .= "X-Mailer: PHP/" . phpversion();
+    $templater = file_get_contents("email_format.php");
+    $htmlContent = str_replace("ttt555rrrttt", $data->code, $templater);
 
+    // Set content-type header for sending HTML email
+    $headers = "MIME-Version: 1.0" . "\r\n";
+    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
 
-    if(mail($toEmail, $subject, $content, $headers)) {
-        $returnData = msg(1,200,$data->code);
+    // Additional headers
+    $headers .= 'From: '.$fromName. "\r\n";
+
+    // Send email
+    if(mail($to, $subject, $htmlContent, $headers)){
+        echo 'Email has sent successfully.';
+    }else{
+    echo 'Email sending failed.';
     }
+
 
 endif;
 
