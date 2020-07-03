@@ -38,6 +38,28 @@ class Auth extends JwtHandler{
         endif;
     }
 
+
+    public function isAuth2(){
+        if(array_key_exists('Authorization',$this->headers) && !empty(trim($this->headers['Authorization']))):
+            $this->token = explode(" ", trim($this->headers['Authorization']));
+            if(isset($this->token[1]) && !empty(trim($this->token[1]))):
+
+                $data = $this->_jwt_decode_data($this->token[1]);
+
+                if(isset($data['auth']) && isset($data['data']) && $data['auth']):
+                    $all_user = $this->fetchAllUser();
+                    return $all_user;
+                else:
+                    return null;
+                endif; // End of isset($this->token[1]) && !empty(trim($this->token[1]))
+            else:
+                return null;
+            endif;// End of isset($this->token[1]) && !empty(trim($this->token[1]))
+        else:
+            return null;
+        endif;
+    }
+
     protected function fetchUser($userid){
         try{
             $fetch_user_by_id = "SELECT * FROM `user_tbl` WHERE `userid`=:userid";
@@ -58,6 +80,21 @@ class Auth extends JwtHandler{
         }
         catch(PDOException $e){
             return null;
+        }
+    }
+
+    protected function fetchAllUser(){
+        try{
+            $sql = 'SELECT * FROM `user_tbl`';
+            foreach ($this->db->query($sql, PDO::FETCH_ASSOC) as $row) {
+                echo json_encode($row);
+            }
+        }catch(PDOException $e){
+            echo [
+                'success' => 0,
+                'status' => 402,
+                'message' => 'No record found'
+            ];
         }
     }
 }

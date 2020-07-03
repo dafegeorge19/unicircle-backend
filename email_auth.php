@@ -37,8 +37,8 @@ else:
     $digits = 4;
     $data->code = rand(pow(10, $digits-1), pow(10, $digits)-1);
 
-    // ini_set( 'display_errors', 1 );
-    // error_reporting( E_ALL );
+    ini_set( 'display_errors', 1 );
+    error_reporting( E_ALL );
 
 
     $to = $data->email;
@@ -58,12 +58,9 @@ else:
     $headers .= 'From: '.$fromName. "\r\n";
 
     // Send email
-    if(mail($to, $subject, $htmlContent, $headers)){
-        echo 'Email has sent successfully.';
-    }else{
-    echo 'Email sending failed.';
+    if(mail($to, $subject, $message, $headers)) {
+        $returnData = msg(1,200,'A verification has been sent to your email.',$data->code);
     }
-
 
 endif;
 

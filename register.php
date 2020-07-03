@@ -83,41 +83,52 @@ else:
             if($check_email_stmt->rowCount()):
                 $returnData = msg(0,422, 'This E-mail already in use!');
             else:
-                $insert_query = "INSERT INTO `user_tbl`(`username`,`password`,`email`,`is_email_verified`,`phone`,`first_name`,`last_name`,`role`) VALUES(:username,:password,:email,:is_email_verified,:phone,:first_name,:last_name,:role)";
 
-                $insert_stmt = $conn->prepare($insert_query);
+                $check_username = "SELECT `username` FROM `user_tbl` WHERE `username`=:username";
+                $check_username_stmt = $conn->prepare($check_username);
+                $check_username_stmt->bindValue(':username', $username,PDO::PARAM_STR);
+                $check_username_stmt->execute();
 
-                // DATA BINDING
-                $insert_stmt->bindValue(':username', htmlspecialchars(strip_tags($username)),PDO::PARAM_STR);
-                $insert_stmt->bindValue(':password', password_hash($password, PASSWORD_DEFAULT),PDO::PARAM_STR);
-                $insert_stmt->bindValue(':email', $email,PDO::PARAM_STR);
-                $insert_stmt->bindValue(':is_email_verified', 1,PDO::PARAM_INT);
-                $insert_stmt->bindValue(':phone', $phone_number,PDO::PARAM_STR);
-                $insert_stmt->bindValue(':first_name', $first_name,PDO::PARAM_STR);
-                $insert_stmt->bindValue(':last_name', $last_name,PDO::PARAM_STR);
-                $insert_stmt->bindValue(':role', 0,PDO::PARAM_INT);
+                if($check_username_stmt->rowCount()):
+                    $returnData = msg(0,422, 'This Username already in use!');
+                else:
+                    $insert_query = "INSERT INTO `user_tbl`(`username`,`password`,`email`,`is_email_verified`,`phone`,`first_name`,`last_name`,`role`) VALUES(:username,:password,:email,:is_email_verified,:phone,:first_name,:last_name,:role)";
 
-                if($insert_stmt->execute()):
-                    $fetch_user_by_id = "SELECT * FROM `user_tbl` WHERE `email`=:email";
-                    $query_stmt = $conn->prepare($fetch_user_by_id);
-                    $query_stmt->bindValue(':email', $email,PDO::PARAM_STR);
-                    $query_stmt->execute();
+                    $insert_stmt = $conn->prepare($insert_query);
 
-                    if($query_stmt->rowCount()):
-                        $row = $query_stmt->fetch(PDO::FETCH_ASSOC);
-                        $returnData = [
-                            'success' => 1,
-                            'status' => 200,
-                            'user' => $row
-                        ];
-                        // $returnData = msg(1,200,'You have successfully registered.');
+                    // DATA BINDING
+                    $insert_stmt->bindValue(':username', htmlspecialchars(strip_tags($username)),PDO::PARAM_STR);
+                    $insert_stmt->bindValue(':password', password_hash($password, PASSWORD_DEFAULT),PDO::PARAM_STR);
+                    $insert_stmt->bindValue(':email', $email,PDO::PARAM_STR);
+                    $insert_stmt->bindValue(':is_email_verified', 1,PDO::PARAM_INT);
+                    $insert_stmt->bindValue(':phone', $phone_number,PDO::PARAM_STR);
+                    $insert_stmt->bindValue(':first_name', $first_name,PDO::PARAM_STR);
+                    $insert_stmt->bindValue(':last_name', $last_name,PDO::PARAM_STR);
+                    $insert_stmt->bindValue(':role', 0,PDO::PARAM_INT);
+
+                    if($insert_stmt->execute()):
+                        $fetch_user_by_id = "SELECT * FROM `user_tbl` WHERE `email`=:email";
+                        $query_stmt = $conn->prepare($fetch_user_by_id);
+                        $query_stmt->bindValue(':email', $email,PDO::PARAM_STR);
+                        $query_stmt->execute();
+
+                        if($query_stmt->rowCount()):
+                            $row = $query_stmt->fetch(PDO::FETCH_ASSOC);
+                            $returnData2 = [
+                                'success' => 1,
+                                'status' => 200,
+                                'user' => $row
+                            ];
+                            $returnData = msg(1,200,'You have successfully registered.',$returnData2);
+                        else:
+                            return null;
+                        endif;
                     else:
                         return null;
-                    endif;
-                else:
-                    return null;
 
+                    endif;
                 endif;
+
             endif;
         }
         catch(PDOException $e){
