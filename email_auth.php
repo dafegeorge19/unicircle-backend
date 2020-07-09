@@ -9,7 +9,7 @@ function msg($success,$status,$message,$extra = []){
     return array_merge([
         'success' => $success,
         'status' => $status,
-        'code' => $message
+        'message' => $message
     ],$extra);
 }
 
@@ -58,8 +58,11 @@ else:
     $headers .= 'From: '.$fromName. "\r\n";
 
     // Send email
-    if(mail($to, $subject, $message, $headers)) {
-        $returnData = msg(1,200,'A verification has been sent to your email.',$data->code);
+    if(mail($to, $subject, $htmlContent, $headers)) {
+        $returnData2 = [
+            "code" => $data->code
+        ];
+        $returnData = msg(1,200,'A verification has been sent to your email.',$returnData2);
     }
 
 endif;

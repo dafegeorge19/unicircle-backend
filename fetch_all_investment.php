@@ -22,7 +22,7 @@ $returnData = [
     "message" => "Unauthorized"
 ];
 
-$auth->isAuth2();
+$auth->fetch_all_investment();
 
 
 ?>

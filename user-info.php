@@ -25,6 +25,5 @@ $returnData = [
 if($auth->isAuth()){
     $returnData = $auth->isAuth();
 }
-
 echo json_encode($returnData);
 ?>

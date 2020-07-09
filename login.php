@@ -73,19 +73,27 @@ else:
                         array("userid"=> $row['userid'])
                     );
 
-                    $fetch_user_by_id = "SELECT * FROM `user_tbl` WHERE `email`=:email";
-                    $query_stmt = $conn->prepare($fetch_user_by_id);
-                    $query_stmt->bindValue(':email', $email,PDO::PARAM_STR);
-                    $query_stmt->execute();
-                    $row = $query_stmt->fetch(PDO::FETCH_ASSOC);
+                    $update_profile_pic = "UPDATE `user_tbl` SET access_token=:access_token WHERE userid=:userid";
+                    $update_profile_pic_stmt = $conn->prepare($update_profile_pic);
+                    $update_profile_pic_stmt->bindValue(':access_token', $token,PDO::PARAM_STR);
+                    $update_profile_pic_stmt->bindValue(':userid', $row['userid'],PDO::PARAM_INT);
+                    if($update_profile_pic_stmt->execute()):
 
-                    $returnData = [
-                        'success' => 1,
-                        'message' => 'You have successfully logged in.',
-                        'token' => $token,
-                        'userinfo' => $row
-                    ];
+                        $fetch_user_by_id = "SELECT * FROM `user_tbl` WHERE `email`=:email";
+                        $query_stmt = $conn->prepare($fetch_user_by_id);
+                        $query_stmt->bindValue(':email', $email,PDO::PARAM_STR);
+                        $query_stmt->execute();
+                        $row = $query_stmt->fetch(PDO::FETCH_ASSOC);
 
+                        $returnData = [
+                            'success' => 1,
+                            'message' => 'You have successfully logged in.',
+                            // 'token' => $token,
+                            'userinfo' => $row
+                        ];
+                    else:
+                        return null;
+                    endif;
                 // IF INVALID PASSWORD
                 else:
                     $returnData = msg(0,422,'Invalid Password!');

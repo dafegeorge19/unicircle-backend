@@ -114,12 +114,21 @@ else:
 
                         if($query_stmt->rowCount()):
                             $row = $query_stmt->fetch(PDO::FETCH_ASSOC);
-                            $returnData2 = [
-                                'success' => 1,
-                                'status' => 200,
-                                'user' => $row
-                            ];
-                            $returnData = msg(1,200,'You have successfully registered.',$returnData2);
+
+                            $insert_wallet = "INSERT INTO `wallet`(userid) VALUES(:userid)";
+                            $insert_wallet_stmt = $conn->prepare($insert_wallet);
+                            $insert_wallet_stmt->bindValue(':userid', $row['userid'],PDO::PARAM_INT);
+                            if($insert_wallet_stmt->execute()):
+
+                                $returnData2 = [
+                                    'success' => 1,
+                                    'status' => 200,
+                                    'user' => $row
+                                ];
+                                $returnData = msg(1,200,'You have successfully registered.',$returnData2);
+                            else:
+                                return null;
+                            endif;
                         else:
                             return null;
                         endif;

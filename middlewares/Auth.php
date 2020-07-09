@@ -38,6 +38,28 @@ class Auth extends JwtHandler{
         endif;
     }
 
+    public function chechAuth(){
+        if(array_key_exists('Authorization',$this->headers) && !empty(trim($this->headers['Authorization']))):
+            $this->token = explode(" ", trim($this->headers['Authorization']));
+            if(isset($this->token[1]) && !empty(trim($this->token[1]))):
+
+                $data = $this->_jwt_decode_data($this->token[1]);
+
+                if(isset($data['auth']) && isset($data['data']) && $data['auth']):
+                    // $all_user = $this->uploadProfilePicture($data['data']->userid);
+                    // return $all_user;
+                    return $data['data']->userid;
+                else:
+                    return false;
+                endif; // End of isset($this->token[1]) && !empty(trim($this->token[1]))
+            else:
+                return null;
+            endif;// End of isset($this->token[1]) && !empty(trim($this->token[1]))
+        else:
+            return null;
+        endif;
+    }
+
 
     public function isAuth2(){
         if(array_key_exists('Authorization',$this->headers) && !empty(trim($this->headers['Authorization']))):
@@ -51,6 +73,29 @@ class Auth extends JwtHandler{
                     return $all_user;
                 else:
                     return null;
+                endif; // End of isset($this->token[1]) && !empty(trim($this->token[1]))
+            else:
+                return null;
+            endif;// End of isset($this->token[1]) && !empty(trim($this->token[1]))
+        else:
+            return null;
+        endif;
+    }
+
+
+    public function isProfileImage(){
+        if(array_key_exists('Authorization',$this->headers) && !empty(trim($this->headers['Authorization']))):
+            $this->token = explode(" ", trim($this->headers['Authorization']));
+            if(isset($this->token[1]) && !empty(trim($this->token[1]))):
+
+                $data = $this->_jwt_decode_data($this->token[1]);
+
+                if(isset($data['auth']) && isset($data['data']) && $data['auth']):
+                    // $all_user = $this->uploadProfilePicture($data['data']->userid);
+                    // return $all_user;
+                    return $data['data']->userid;
+                else:
+                    return false;
                 endif; // End of isset($this->token[1]) && !empty(trim($this->token[1]))
             else:
                 return null;
@@ -84,11 +129,52 @@ class Auth extends JwtHandler{
     }
 
     protected function fetchAllUser(){
+        $process = array();
         try{
             $sql = 'SELECT * FROM `user_tbl`';
             foreach ($this->db->query($sql, PDO::FETCH_ASSOC) as $row) {
-                echo json_encode($row);
+                $data[] = $row;
+                echo json_encode(['status'=>1, 'user'=>$data]);
             }
+        }catch(PDOException $e){
+            echo [
+                'success' => 0,
+                'status' => 402,
+                'message' => 'No record found'
+            ];
+        }
+    }
+
+    public function fetch_all_investment(){
+        if(array_key_exists('Authorization',$this->headers) && !empty(trim($this->headers['Authorization']))):
+            $this->token = explode(" ", trim($this->headers['Authorization']));
+            if(isset($this->token[1]) && !empty(trim($this->token[1]))):
+
+                $data = $this->_jwt_decode_data($this->token[1]);
+
+                if(isset($data['auth']) && isset($data['data']) && $data['auth']):
+                    $all_investment = $this->fetchAllInvestment();
+                    return $all_investment;
+                else:
+                    return null;
+                endif; // End of isset($this->token[1]) && !empty(trim($this->token[1]))
+            else:
+                return null;
+            endif;// End of isset($this->token[1]) && !empty(trim($this->token[1]))
+        else:
+            return null;
+        endif;
+    }
+
+    protected function fetchAllInvestment(){
+        $process = array();
+        try{
+            $sql = 'SELECT * FROM `investment_tbl`';
+            foreach ($this->db->query($sql, PDO::FETCH_ASSOC) as $row) {
+                $data[] = $row;
+
+            }
+            echo json_encode(['status'=>1, 'invest'=>$data]);
         }catch(PDOException $e){
             echo [
                 'success' => 0,
