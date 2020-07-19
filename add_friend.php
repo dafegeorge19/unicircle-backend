@@ -34,75 +34,34 @@ $returnData = [
 if($_SERVER["REQUEST_METHOD"] != "POST"):
     $returnData = msg(0,404,'Page Not Found!');
 
-// CHECKING EMPTY FIELDS
-elseif(!isset($data->email)
-    || !isset($data->phone_number)
-    || !isset($data->first_name)
-    || !isset($data->last_name)
-    || empty(trim($data->email))
-    || empty(trim($data->phone_number))
-    || empty(trim($data->first_name))
-    || empty(trim($data->last_name))
-    ):
-
-    $fields = ['fields' => ['phone_number','first_name','last_name','email']];
-    $returnData = msg(0,422,'Please Fill in all Required Fields!',$fields);
-// IF THERE ARE NO EMPTY FIELDS THEN-
 else:
-    $email = trim($data->email);
-    $phone_number = trim($data->phone_number);
-    $first_name = trim($data->first_name);
-    $last_name = trim($data->last_name);
+    $friend_id= trim($data->friend_id);
 
-    if(strlen($phone_number) < 11 || preg_match("/^[0-9]{3}-[0-9]{4}-[0-9]{4}$/", $phone_number)):
-        $returnData = msg(0,422,'Your phone number is not properly formatted');
+    try{
+        if($auth->checkAuth()):
+            $userid = $auth->checkAuth();
 
-    elseif($first_name == ''):
-        $returnData = msg(0,422,'Firstname field cannot be empty!');
-
-    elseif($last_name == ''):
-        $returnData = msg(0,422,'Lastname field cannot be empty!');
-
-    else:
-        try{
-            if($auth->checkAuth()):
-                $userid = $auth->checkAuth();
-                $insert_query = "UPDATE `user_tbl` SET first_name=:first_name, last_name=:last_name, email=:email, phone=:phone_number WHERE userid=:userid";
-
-                $insert_stmt = $conn->prepare($insert_query);
-
-                // DATA BINDING
-                $insert_stmt->bindValue(':first_name', htmlspecialchars(strip_tags($first_name)),PDO::PARAM_STR);
-                $insert_stmt->bindValue(':last_name', htmlspecialchars(strip_tags($last_name)),PDO::PARAM_STR);
-                $insert_stmt->bindValue(':email', htmlspecialchars(strip_tags($email)),PDO::PARAM_STR);
-                $insert_stmt->bindValue(':phone_number', htmlspecialchars(strip_tags($phone_number)),PDO::PARAM_STR);
-                $insert_stmt->bindValue(':userid', htmlspecialchars(strip_tags($userid)),PDO::PARAM_INT);
-                if($insert_stmt->execute()):
-                    $fetch_user_by_id = "SELECT * FROM `user_tbl` WHERE `email`=:email";
-                    $query_stmt = $conn->prepare($fetch_user_by_id);
-                    $query_stmt->bindValue(':email', $email,PDO::PARAM_STR);
-                    $query_stmt->execute();
-
-                    if($query_stmt->rowCount()):
-                        $row = $query_stmt->fetch(PDO::FETCH_ASSOC);
-                        $returnData2 = [
-                            'success' => 1,
-                            'status' => 200,
-                            'user' => $row
-                        ];
-                        $returnData = msg(1,200,'Profile updated.',$returnData2);
-                    else:
-                        return null;
-                    endif;
-                endif;
+            if($auth->isUsersFriends($userid,$friend_id)){
+                echo json_encode(['success' => 0, 'status' => 404, 'message' => "You are friends already!"]);
+                return false;
+            }
+            $insert_query = "INSERT INTO `friend_list`(userid,friend_id) VALUE (:userid,:friend_id)";
+            $insert_stmt = $conn->prepare($insert_query);
+            $insert_stmt->bindValue(':userid', htmlspecialchars(strip_tags($userid)),PDO::PARAM_STR);
+            $insert_stmt->bindValue(':friend_id', htmlspecialchars(strip_tags($friend_id)),PDO::PARAM_STR);
+            if($insert_stmt->execute()):
+                $returnData = msg(1,200,'Friend added.');
             else:
-                return null;
+                return false;
             endif;
-        }catch(PDOException $e){
-            $returnData = msg(0,500,$e->getMessage());
-        }
-    endif;
+        else:
+            return null;
+        endif;
+    }catch(PDOException $e){
+        $returnData = msg(0,500,$e->getMessage());
+    }
 endif;
 
 echo json_encode($returnData);
+
 ?>

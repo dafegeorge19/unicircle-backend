@@ -239,5 +239,18 @@ class Auth extends JwtHandler{
             return null;
         endif;
     }
+
+    public function isUsersFriends($userid,$friend_id){
+        $query = "SELECT * FROM friend_list WHERE userid=:userid AND friend_id=:friend_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':userid', $userid);
+        $stmt->bindValue(':friend_id', $friend_id);
+        $stmt->execute();
+        if($stmt->rowCount() > 0){
+            return true;
+        }else{
+            return false;
+        }
+    }
 }
 ?>
