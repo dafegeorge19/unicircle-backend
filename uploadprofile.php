@@ -31,7 +31,7 @@ $returnData = [
 ];
 
 $upload_dir = 'profile_picture/';
-$server_url = __DIR__."/profile_picture/";
+$server_url = BASE_URL."/profile_picture/";
 
 if($auth->isProfileImage()):
     $userid = $auth->isProfileImage();

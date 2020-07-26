@@ -1,5 +1,6 @@
 <?php
 define('__DIR__', "http://localhost/unicircle_backend/");
+define('BASE_URL', "http://localhost/unicircle_backend/");
 class Database{
 
     // CHANGE THE DB INFO ACCORDING TO YOUR DATABASE

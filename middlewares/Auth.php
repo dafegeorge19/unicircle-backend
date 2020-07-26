@@ -126,7 +126,7 @@ class Auth extends JwtHandler{
         endif;
     }
 
-    protected function fetchUser($userid){
+    public function fetchUser($userid){
         try{
             $fetch_user_by_id = "SELECT * FROM `user_tbl` WHERE `userid`=:userid";
             $query_stmt = $this->db->prepare($fetch_user_by_id);
@@ -250,6 +250,22 @@ class Auth extends JwtHandler{
             return true;
         }else{
             return false;
+        }
+    }
+
+    public function fetch_friendship($userid, $friend_id){
+        print_r($userid);
+        return;
+        $query = "SELECT * FROM friend_list WHERE userid=:userid AND friend_id=:friend_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':userid', $userid);
+        $stmt->bindValue(':friend_id', $friend_id);
+        $stmt->execute();
+        if($stmt->rowCount() > 0){
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return  $row;
+        }else{
+            return 'not_friends';
         }
     }
 }

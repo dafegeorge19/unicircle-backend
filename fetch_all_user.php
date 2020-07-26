@@ -23,6 +23,4 @@ $returnData = [
 ];
 
 $auth->isAuth2();
-
-
 ?>

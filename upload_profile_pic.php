@@ -14,7 +14,7 @@ function msg($success,$status,$message,$extra = []){
 }
 
 // INCLUDING DATABASE AND MAKING OBJECT
-require __DIR__.'/classes/Database.php';
+require BASE_URL.'classes/Database.php';
 $db_connection = new Database();
 $conn = $db_connection->dbConnection();
 
@@ -23,7 +23,7 @@ $data = json_decode(file_get_contents("php://input"));
 $response = [];
 
 $upload_dir = 'profile_picture/';
-$server_url = __DIR__;
+//$server_url = ;
 
 if($_FILES['avatar'])
 {
@@ -47,10 +47,9 @@ if($_FILES['avatar'])
                 "success" => 1,
                 "status" => 200,
                 "message" => "File uploaded successfully",
-                "url" => $server_url."/".$upload_name
+                "url" => BASE_URL.$upload_name
             );
         else:
-
             $response = array(
                 "success" => 0,
                 "status" => 422,

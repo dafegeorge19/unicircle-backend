@@ -40,15 +40,15 @@ else:
     try{
         if($auth->checkAuth()):
             $userid = $auth->checkAuth();
-
             if($auth->isUsersFriends($userid,$friend_id)){
                 echo json_encode(['success' => 0, 'status' => 404, 'message' => "You are friends already!"]);
                 return false;
             }
-            $insert_query = "INSERT INTO `friend_list`(userid,friend_id) VALUE (:userid,:friend_id)";
+            $insert_query = "INSERT INTO `friend_list`(userid,friend_id,status) VALUE (:userid,:friend_id,:status)";
             $insert_stmt = $conn->prepare($insert_query);
             $insert_stmt->bindValue(':userid', htmlspecialchars(strip_tags($userid)),PDO::PARAM_STR);
             $insert_stmt->bindValue(':friend_id', htmlspecialchars(strip_tags($friend_id)),PDO::PARAM_STR);
+            $insert_stmt->bindValue(':status', "Pending",PDO::PARAM_STR);
             if($insert_stmt->execute()):
                 $returnData = msg(1,200,'Friend added.');
             else:

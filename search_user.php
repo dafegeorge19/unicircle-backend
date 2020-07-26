@@ -13,6 +13,7 @@ function msg($success,$status,$message,$extra = []){
     ],$extra);
 }
 
+
 require __DIR__.'/classes/Database.php';
 require __DIR__.'/middlewares/Auth.php';
 
@@ -40,21 +41,32 @@ elseif(!isset($data->search_query)
 ):
 //    $returnData = msg(0,422,'Please Fill in all Required Fields!');
     if($auth->checkAuth()):
-        $data = [];
-        try {
-            $sql = "SELECT * FROM `user_tbl`";
-            foreach ($conn->query($sql, PDO::FETCH_ASSOC) as $row) {
-                $data[] = $row;
+        $userid = $auth->checkAuth();
+        $d = [];
+        $sql = "SELECT * FROM `user_tbl` WHERE `userid` != :userid";
+        $que=$conn->prepare($sql);
+        $que->bindValue(':userid', $userid);
+        $que->execute();
+        while ($d=$que->fetch(PDO::FETCH_ASSOC)){
+            $row= [];
+            $query = "SELECT * FROM friend_list WHERE userid=:userid AND friend_id=:friend_id";
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(':userid', $userid);
+            $stmt->bindValue(':friend_id', $d['userid']);
+            $stmt->execute();
+            if($stmt->rowCount() > 0){
+                $row['friend_status'] = $stmt->fetch(PDO::FETCH_ASSOC);
+            }else{
+                $row['friend_status'] = ['status' => "not_friend"];
             }
-            echo json_encode(["status" => 1, "user" => $data]);
-            return true;
-        }catch(PDOException $e) {
-            echo json_encode([
-                'success' => 0,
-                'status' => 402,
-                'message' => 'No record found'
-            ]);
+
+            array_push($d, $row);
+
+            $dd[] = $d;
         }
+        if($d['userid'] != $userid):
+            echo json_encode(["status"=> 1, "user" => $dd]);
+        endif;
     else:
         $returnData = json_encode(msg(0,500,"Could not authenticate you."));
         return false;
@@ -63,33 +75,37 @@ else:
     $search_query = $data->search_query;
 
     if($auth->checkAuth()):
-        $data = [];
-        try {
-            $query = '';
-            $params = [];
+        $d = [];
+        $userid = $auth->checkAuth();
 
-            if(isset($search_query)){
-                $query= 'SELECT * FROM `user_tbl` WHERE username LIKE :search_term OR email LIKE :search_term OR unicircle_email LIKE :search_term OR first_name LIKE :search_term OR last_name LIKE :search_term OR phone LIKE :search_term';
-                $params['search_term'] = '%'.$search_query.'%';
-            }
+        $sql="SELECT * FROM `user_tbl` WHERE `username` LIKE :search_term OR `email` LIKE :search_term OR `unicircle_email` LIKE :search_term OR `first_name` LIKE :search_term OR `last_name` LIKE :search_term OR `phone` LIKE :search_term";
+        $q=$conn->prepare($sql);
+        $q->bindValue(':search_term','%'.$search_query.'%');
+        $q->execute();
+        while ($d=$q->fetch(PDO::FETCH_ASSOC)){
+            $row = [];
+            $query = "SELECT * FROM friend_list WHERE userid=:userid AND friend_id=:friend_id";
             $stmt = $conn->prepare($query);
-            foreach($params as $key=>$value){
-                $stmt->bindValue(':'.$key, $value);
-            }
+            $stmt->bindValue(':userid', $userid);
+            $stmt->bindValue(':friend_id', $d['userid']);
             $stmt->execute();
-            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            echo json_encode(["status" => 1, "user" => $data]);
-            return true;
-        }catch(PDOException $e) {
-            echo json_encode([
-                'success' => 0,
-                'status' => 402,
-                'message' => 'No record found'
-            ]);
+            if($stmt->rowCount() > 0){
+                $row['friend_status'] = $stmt->fetch(PDO::FETCH_ASSOC);
+            }else{
+                $row['friend_status'] = ['status' => "not_friend"];
+            }
+
+            array_push($d, $row);
+
+            $dd[] = $d;
         }
+        if($d['userid'] != $userid):
+            echo json_encode(["status"=> 1, "user" => $dd]);
+        endif;
     else:
         $returnData = json_encode(msg(0,500,"Could not authenticate you."));
         return false;
     endif;
 endif;
+
 ?>
