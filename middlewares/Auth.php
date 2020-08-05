@@ -50,10 +50,10 @@ class Auth extends JwtHandler{
                     // return $all_user;
                      return $data['data']->userid;
                 else:
-                    return false;
+                    return json_encode(["success"=>0, "status"=>402, "message"=>"Could not authenticate!"]);
                 endif; // End of isset($this->token[1]) && !empty(trim($this->token[1]))
             else:
-                return null;
+                return json_encode(["success"=>0, "status"=>402, "message"=>"Could not authenticate!"]);
             endif;// End of isset($this->token[1]) && !empty(trim($this->token[1]))
         else:
             return null;
