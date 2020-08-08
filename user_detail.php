@@ -22,6 +22,8 @@ $returnData = [
     "message" => "Unauthorized"
 ];
 
+$friend_id = isset($_POST['friend_id']) ? $_POST['friend_id'] : "Friend id empty!";
+
 if($_SERVER["REQUEST_METHOD"] != "POST"):
     $returnData = msg(0,404,'Page Not Found!');
 elseif(!isset($data->friend_id) || empty(trim($data->friend_id))):
@@ -33,7 +35,7 @@ else:
         try{
             $fetch_user_by_id = "SELECT * FROM `user_tbl` WHERE `userid`=:userid";
             $query_stmt = $conn->prepare($fetch_user_by_id);
-            $query_stmt->bindValue(':userid', $data->friend_id,PDO::PARAM_INT);
+            $query_stmt->bindValue(':userid', $friend_id,PDO::PARAM_INT);
             $query_stmt->execute();
 
             if($query_stmt->rowCount()):

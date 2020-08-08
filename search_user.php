@@ -103,9 +103,9 @@ else:
             echo json_encode(["status"=> 1, "user" => $dd]);
         endif;
     else:
-        $returnData = json_encode(msg(0,500,"Could not authenticate you."));
+        echo json_encode(msg(0,500,"Could not authenticate you."));
         return false;
     endif;
 endif;
 
-?>
+

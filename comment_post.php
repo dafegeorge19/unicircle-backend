@@ -30,26 +30,29 @@ $returnData = [
     "message" => "Unauthorized"
 ];
 
-$upload_dir = 'feed_media/';
-$server_url = BASE_URL."/feed_media/";
+$upload_dir = 'comment_media/';
+$server_url = BASE_URL."/comment_media/";
 $allowed = array('gif', 'png', 'jpg', 'mp4', 'jpeg', 'bmp');
 
 if($_SERVER["REQUEST_METHOD"] != "POST"):
     $returnData = msg(0,404,'Page Not Found!');
 
 // CHECKING EMPTY FIELDS
-elseif(!isset($_POST['body'])
-    || empty(trim($_POST['body']))
+elseif(!isset($_POST['feed_id'])
+    || !isset($_POST['comment'])
+    || empty(trim($_POST['feed_id']))
+    || empty(trim($_POST['comment']))
 ):
     $returnData = msg(0,422,'Please Fill in all Required Fields!');
 else:
     if($auth->checkAuth()):
         $userid = $auth->checkAuth();
         $status = 'Active';
-        $title = $_POST['body'];
-        if(isset($_FILES['files'])){
-            $query = "INSERT into feed_tbl(`userid`,`title`,`media`,`status`)
-             VALUES(:userid,:title,:media,:status)";
+        $feed_id = $_POST['feed_id'];
+        $comment = $_POST['comment'];
+        if(is_uploaded_file($_FILES['files']['tmp_name'])){
+            $query = "INSERT into comment_tbl(`feed_id`,`comment`,`media`,`status`)
+             VALUES(:feed_id,:comment,:media,:status)";
             $stmt  = $conn->prepare($query);
             $medias = [];
             foreach($_FILES['files']['tmp_name'] as $key => $error ){
@@ -68,7 +71,7 @@ else:
                 if (!in_array($ext, $allowed)) {
                     echo json_encode(msg(0,500,"File is in bad format."));
                     return false;
-                }elseif($ext == 'mp4' && $file_size > 8097152){
+                }elseif($ext == 'mp4' && $file_size > 10097152){
                     echo json_encode(msg(0,500,"video media too large."));
                     return false;
                 }elseif($ext != 'mp4' && $file_size > 2097152){
@@ -85,11 +88,10 @@ else:
                     mkdir($upload_dir, 0700);// Create directory if it does not exist
                 }
                 move_uploaded_file($file_tmp, $upload_name);
-
             }
             $med = json_encode($medias);
-            $stmt->bindParam(':userid', $userid, PDO::PARAM_STR);
-            $stmt->bindParam( ':title', $title , PDO::PARAM_STR );
+            $stmt->bindParam(':feed_id', $feed_id, PDO::PARAM_STR);
+            $stmt->bindParam( ':comment', $comment , PDO::PARAM_STR );
             $stmt->bindParam( ':media', $med, PDO::PARAM_STR );
             $stmt->bindParam( ':status', $status, PDO::PARAM_STR );
             if($stmt->execute()){
@@ -98,23 +100,19 @@ else:
             }
         }else{
             $med = '';
-            $query = "INSERT into feed_tbl(`userid`,`title`,`media`,`status`)
-             VALUES(:userid,:title,:media,:status)";
+            $query = "INSERT into comment_tbl(`feed_id`,`comment`,`media`,`status`)
+             VALUES(:feed_id,:comment,:media,:status)";
             $stmt  = $conn->prepare($query);
-            $stmt->bindParam(':userid', $userid, PDO::PARAM_STR);
-            $stmt->bindParam( ':title', $title , PDO::PARAM_STR );
-            $stmt->bindParam( ':media',$med, PDO::PARAM_STR );
+            $stmt->bindParam(':feed_id', $feed_id, PDO::PARAM_STR);
+            $stmt->bindParam( ':comment', $comment , PDO::PARAM_STR );
+            $stmt->bindParam( ':media', $med, PDO::PARAM_STR );
             $stmt->bindParam( ':status', $status, PDO::PARAM_STR );
             if($stmt->execute()){
                 echo json_encode(msg(1,200,"Success"));
                 return true;
             }
         }
-    else:
-        return false;
     endif;
 endif;
 
 echo json_encode($returnData);
-
-
